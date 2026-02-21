@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redeem Codes - Galaxy Host</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 500px;
+            width: 90%;
+            background-color: #1e1e1e;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            text-align: center;
+        }
+        h1 {
+            color: #4da6ff;
+            margin-bottom: 20px;
+        }
+        .code-box {
+            background-color: #2a2a2a;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #333;
+        }
+        .code-text {
+            font-family: monospace;
+            font-size: 18px;
+            color: #ffcc00;
+            letter-spacing: 2px;
+        }
+        button.copy-btn {
+            background-color: #4da6ff;
+            color: #121212;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+        button.copy-btn:hover {
+            background-color: #3388dd;
+        }
+        a.back-btn {
+            display: inline-block;
+            margin-top: 20px;
+            color: #aaaaaa;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.2s;
+        }
+        a.back-btn:hover {
+            color: #ffffff;
+        }
+        footer {
+            margin-top: 30px;
+            font-size: 12px;
+            color: #777777;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Active Redeem Codes</h1>
+        <p style="color: #aaa; margin-bottom: 25px;">Click the button to copy the code, then paste it in-game!</p>
+
+        <div class="code-box">
+            <span class="code-text" id="code1">GALAXYNEW</span>
+            <button class="copy-btn" onclick="copyCode('code1')">Copy</button>
+        </div>
+
+        <div class="code-box">
+            <span class="code-text" id="code2">FREEDL2026</span>
+            <button class="copy-btn" onclick="copyCode('code2')">Copy</button>
+        </div>
+
+        <div class="code-box">
+            <span class="code-text" id="code3">VIPMEMBER</span>
+            <button class="copy-btn" onclick="copyCode('code3')">Copy</button>
+        </div>
+
+        <a href="index.html" class="back-btn">← Back to Home</a>
+    </div>
+
+    <footer>
+        &copy; 2026 Galaxy Host GTPS. All rights reserved.
+    </footer>
+
+    <script>
+        function copyCode(elementId) {
+            // Ambil teks dari elemen span
+            var codeText = document.getElementById(elementId).innerText;
+            
+            // Salin ke clipboard
+            navigator.clipboard.writeText(codeText).then(function() {
+                alert("Code '" + codeText + "' copied to clipboard!");
+            }).catch(function(err) {
+                console.error('Could not copy text: ', err);
+            });
+        }
+    </script>
+</body>
+</html>
