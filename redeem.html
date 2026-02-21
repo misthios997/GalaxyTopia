@@ -2,119 +2,185 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Redeem Codes - Galaxy Host</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Redeem Codes - GalaxyTopia</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #121212;
-            color: #ffffff;
+        :root {
+            --primary: #6C5CE7;
+            --bg-color: #0b0c10;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --text-main: #ffffff;
+            --text-muted: #b2bec3;
+        }
+
+        * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: radial-gradient(circle at bottom, #1a1b26, var(--bg-color));
+            color: var(--text-main);
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
+            padding: 20px;
         }
+
         .container {
             max-width: 500px;
-            width: 90%;
-            background-color: #1e1e1e;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            width: 100%;
+            background: var(--card-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--border-color);
+            padding: 40px 30px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
             text-align: center;
         }
+
         h1 {
-            color: #4da6ff;
-            margin-bottom: 20px;
+            font-weight: 800;
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: #fff;
         }
+
+        p.subtitle {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 30px;
+        }
+
         .code-box {
-            background-color: #2a2a2a;
-            padding: 15px;
-            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+            padding: 15px 20px;
+            border-radius: 12px;
             margin-bottom: 15px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border: 1px solid #333;
+            transition: all 0.3s ease;
         }
+
+        .code-box:hover {
+            border-color: var(--primary);
+            box-shadow: 0 0 15px rgba(108, 92, 231, 0.2);
+        }
+
         .code-text {
             font-family: monospace;
-            font-size: 18px;
-            color: #ffcc00;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #a29bfe;
             letter-spacing: 2px;
         }
+
         button.copy-btn {
-            background-color: #4da6ff;
-            color: #121212;
+            background: var(--primary);
+            color: #fff;
             border: none;
-            padding: 8px 15px;
-            border-radius: 5px;
+            padding: 8px 16px;
+            border-radius: 8px;
             cursor: pointer;
-            font-weight: bold;
-            transition: 0.2s;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
         }
+
         button.copy-btn:hover {
-            background-color: #3388dd;
+            background: #5a4bcf;
+            transform: scale(1.05);
         }
+
+        button.copy-btn.copied {
+            background: #00b894;
+        }
+
         a.back-btn {
-            display: inline-block;
-            margin-top: 20px;
-            color: #aaaaaa;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 25px;
+            color: var(--text-muted);
             text-decoration: none;
-            font-size: 14px;
-            transition: color 0.2s;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: color 0.3s ease;
         }
+
         a.back-btn:hover {
-            color: #ffffff;
+            color: #fff;
         }
+
         footer {
             margin-top: 30px;
-            font-size: 12px;
-            color: #777777;
+            font-size: 0.8rem;
+            color: #636e72;
+            text-align: center;
         }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h1>Active Redeem Codes</h1>
-        <p style="color: #aaa; margin-bottom: 25px;">Click the button to copy the code, then paste it in-game!</p>
+        <h1><i class="fa-solid fa-gift" style="color: var(--primary);"></i> Reward Codes</h1>
+        <p class="subtitle">Copy the code below and claim your rewards in GalaxyTopia!</p>
 
         <div class="code-box">
             <span class="code-text" id="code1">GALAXYNEW</span>
-            <button class="copy-btn" onclick="copyCode('code1')">Copy</button>
+            <button class="copy-btn" onclick="copyCode('code1', this)">Copy</button>
         </div>
 
         <div class="code-box">
             <span class="code-text" id="code2">FREEDL2026</span>
-            <button class="copy-btn" onclick="copyCode('code2')">Copy</button>
+            <button class="copy-btn" onclick="copyCode('code2', this)">Copy</button>
         </div>
 
         <div class="code-box">
             <span class="code-text" id="code3">VIPMEMBER</span>
-            <button class="copy-btn" onclick="copyCode('code3')">Copy</button>
+            <button class="copy-btn" onclick="copyCode('code3', this)">Copy</button>
         </div>
 
-        <a href="index.html" class="back-btn">← Back to Home</a>
+        <a href="index.html" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Back to Home</a>
     </div>
 
     <footer>
-        &copy; 2026 Galaxy Host GTPS. All rights reserved.
+        &copy; 2026 GalaxyTopia. All rights reserved.
     </footer>
 
     <script>
-        function copyCode(elementId) {
-            // Ambil teks dari elemen span
+        function copyCode(elementId, btnElement) {
+            // Mengambil teks dari element ID
             var codeText = document.getElementById(elementId).innerText;
             
-            // Salin ke clipboard
+            // Proses copy
             navigator.clipboard.writeText(codeText).then(function() {
-                alert("Code '" + codeText + "' copied to clipboard!");
+                // Mengubah teks dan warna tombol saat berhasil dicopy
+                var originalText = btnElement.innerText;
+                btnElement.innerText = "Copied!";
+                btnElement.classList.add("copied");
+                
+                // Mengembalikan tombol seperti semula setelah 2 detik
+                setTimeout(function() {
+                    btnElement.innerText = originalText;
+                    btnElement.classList.remove("copied");
+                }, 2000);
             }).catch(function(err) {
                 console.error('Could not copy text: ', err);
+                alert("Gagal menyalin kode.");
             });
         }
     </script>
