@@ -1,193 +1,1251 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GalaxyTopia - Custom GTPS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>GalaxyTopia · Dashboard</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
     <style>
         :root {
-            --primary: #6C5CE7;
-            --secondary: #a29bfe;
-            --bg-color: #0b0c10;
-            --card-bg: rgba(255, 255, 255, 0.05);
-            --border-color: rgba(255, 255, 255, 0.1);
-            --text-main: #ffffff;
-            --text-muted: #b2bec3;
+            --star-color: rgba(180,180,255,0.6);
+            --accent: #7c3aed;
+            --accent2: #06b6d4;
+            --glow: rgba(124,58,237,0.4);
+            --bg: #04030d;
+            --card: rgba(10,8,30,0.85);
+            --border: rgba(124,58,237,0.2);
+            --border-hover: rgba(124,58,237,0.5);
+            --text: #e2e8f0;
+            --muted: #64748b;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { font-family: 'Rajdhani', sans-serif; margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: 'Poppins', sans-serif;
-            background: radial-gradient(circle at top, #1a1b26, var(--bg-color));
-            color: var(--text-main);
+            background: var(--bg);
+            color: var(--text);
             min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ===== STARFIELD ===== */
+        #starfield {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* ===== NEBULA BG ===== */
+        .nebula-bg {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            background:
+                radial-gradient(ellipse 80% 60% at 20% 10%, rgba(76,29,149,0.25) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 50% at 80% 80%, rgba(6,182,212,0.12) 0%, transparent 55%),
+                radial-gradient(ellipse 50% 40% at 50% 50%, rgba(124,58,237,0.08) 0%, transparent 60%);
+        }
+
+        /* ===== LAYOUT ===== */
+        .page-wrap {
+            position: relative;
+            z-index: 1;
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 16px 60px;
+        }
+
+        /* ===== NAVBAR ===== */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 50;
             display: flex;
-            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 24px;
+            background: rgba(4,3,13,0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, #7c3aed, #06b6d4);
+            border-radius: 10px;
+            display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            font-size: 18px;
+            box-shadow: 0 0 20px rgba(124,58,237,0.5);
         }
 
-        .container {
-            max-width: 650px;
-            width: 100%;
-            background: var(--card-bg);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border: 1px solid var(--border-color);
-            padding: 40px 30px;
-            border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
-            text-align: center;
-        }
-
-        .logo-container {
-            font-size: 3rem;
-            color: var(--primary);
-            margin-bottom: 10px;
-            text-shadow: 0 0 15px rgba(108, 92, 231, 0.5);
-        }
-
-        h1 {
+        .logo-text {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2rem;
             font-weight: 800;
-            font-size: 2.2rem;
-            margin-bottom: 15px;
-            background: linear-gradient(45deg, #a29bfe, #6C5CE7);
+            background: linear-gradient(90deg, #a78bfa, #22d3ee);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            letter-spacing: 1px;
         }
 
-        p.about {
-            font-size: 0.95rem;
-            color: var(--text-muted);
-            line-height: 1.7;
-            margin-bottom: 35px;
+        .version-tag {
+            font-size: 10px;
+            color: var(--muted);
+            background: rgba(124,58,237,0.1);
+            border: 1px solid var(--border);
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-family: 'Orbitron', sans-serif;
         }
 
-        .links-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 15px;
-            margin-bottom: 35px;
+        .nav-links a {
+            color: var(--muted);
+            font-size: 0.875rem;
+            font-weight: 600;
+            padding: 6px 14px;
+            border-radius: 8px;
+            transition: all 0.2s;
+            letter-spacing: 0.5px;
+            text-decoration: none;
         }
 
-        a.button {
+        .nav-links a:hover {
+            color: white;
+            background: rgba(124,58,237,0.15);
+        }
+
+        /* ===== CARDS ===== */
+        .g-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            backdrop-filter: blur(12px);
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .g-card:hover {
+            border-color: var(--border-hover);
+            box-shadow: 0 0 30px rgba(124,58,237,0.1);
+        }
+
+        /* ===== STATUS BADGE ===== */
+        .badge-online {
+            background: rgba(16,185,129,0.1);
+            border: 1px solid rgba(16,185,129,0.3);
+            color: #34d399;
+        }
+
+        .badge-offline {
+            background: rgba(239,68,68,0.1);
+            border: 1px solid rgba(239,68,68,0.3);
+            color: #f87171;
+        }
+
+        /* ===== STAT MINI ===== */
+        .stat-mini {
+            background: rgba(124,58,237,0.07);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 10px 16px;
+            text-align: center;
+            min-width: 70px;
+        }
+
+        .stat-mini-label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 9px;
+            color: var(--muted);
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+
+        .stat-mini-val {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        /* ===== SECTION TITLE ===== */
+        .sec-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* ===== HOST ITEMS ===== */
+        .host-item {
+            background: rgba(124,58,237,0.06);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.2s;
+        }
+
+        .host-item:hover {
+            background: rgba(124,58,237,0.12);
+            border-color: var(--border-hover);
+        }
+
+        .copy-btn, .dl-btn {
+            background: rgba(124,58,237,0.15);
+            border: 1px solid rgba(124,58,237,0.3);
+            color: #a78bfa;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            font-family: 'Orbitron', sans-serif;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            letter-spacing: 0.5px;
+        }
+
+        .copy-btn:hover, .dl-btn:hover {
+            background: rgba(124,58,237,0.3);
+            color: white;
+            box-shadow: 0 0 12px rgba(124,58,237,0.3);
+        }
+
+        /* ===== PROGRESS ===== */
+        .progress-track {
+            height: 6px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 999px;
+            transition: width 0.5s ease;
+        }
+
+        /* ===== WORLD CARDS ===== */
+        .world-card {
+            background: rgba(124,58,237,0.06);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .world-card:hover {
+            background: rgba(124,58,237,0.14);
+            border-color: var(--border-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 0 16px rgba(124,58,237,0.2);
+        }
+
+        /* ===== STAFF CARD ===== */
+        .staff-card {
+            background: rgba(124,58,237,0.06);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s;
+        }
+
+        .staff-card:hover {
+            border-color: var(--border-hover);
+            background: rgba(124,58,237,0.12);
+        }
+
+        .staff-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
-            background: rgba(255, 255, 255, 0.03);
-            color: var(--text-main);
-            text-decoration: none;
-            padding: 15px 20px;
-            border-radius: 12px;
-            font-weight: 600;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
             font-size: 0.9rem;
-            border: 1px solid var(--border-color);
-            transition: all 0.3s ease;
+            flex-shrink: 0;
         }
 
-        a.button:hover {
-            background: var(--primary);
-            border-color: var(--primary);
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(108, 92, 231, 0.4);
+        .avatar-owner {
+            background: linear-gradient(135deg, #7c3aed, #4f46e5);
+            border: 2px solid rgba(167,139,250,0.4);
+            color: #e9d5ff;
+            box-shadow: 0 0 12px rgba(124,58,237,0.4);
         }
 
-        .report-card {
-            background: rgba(255, 71, 87, 0.05);
-            border: 1px solid rgba(255, 71, 87, 0.2);
-            padding: 25px;
-            border-radius: 15px;
+        .avatar-co {
+            background: linear-gradient(135deg, #0e7490, #0284c7);
+            border: 2px solid rgba(34,211,238,0.4);
+            color: #a5f3fc;
+            box-shadow: 0 0 12px rgba(6,182,212,0.3);
         }
 
-        .report-card h3 {
-            color: #ff4757;
-            margin-bottom: 10px;
-            font-size: 1.2rem;
+        .badge-owner {
+            background: rgba(124,58,237,0.15);
+            border: 1px solid rgba(124,58,237,0.3);
+            color: #c4b5fd;
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 0.5px;
         }
 
-        .report-card p {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            margin-bottom: 20px;
+        .badge-co {
+            background: rgba(6,182,212,0.1);
+            border: 1px solid rgba(6,182,212,0.25);
+            color: #67e8f9;
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 0.5px;
         }
 
-        a.btn-danger {
-            background: #ff4757;
-            border: none;
-            color: #fff;
-            box-shadow: 0 5px 15px rgba(255, 71, 87, 0.3);
+        /* ===== FAQ ===== */
+        .faq-item {
+            border-bottom: 1px solid rgba(124,58,237,0.12);
+            padding: 14px 0;
         }
 
-        a.btn-danger:hover {
-            background: #ff6b81;
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(255, 71, 87, 0.5);
+        .faq-item:last-child { border-bottom: none; }
+
+        .faq-question {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #cbd5e1;
+            transition: color 0.2s;
         }
 
-        footer {
-            margin-top: 30px;
-            font-size: 0.8rem;
-            color: #636e72;
+        .faq-question:hover { color: #a78bfa; }
+
+        .faq-icon { transition: transform 0.3s; color: var(--muted); }
+        .faq-item.open .faq-icon { transform: rotate(180deg); color: #a78bfa; }
+
+        .faq-answer {
+            margin-top: 10px;
+            color: var(--muted);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            padding-right: 24px;
+        }
+
+        /* ===== CHART ===== */
+        .chart-wrap {
+            position: relative;
+            height: 200px;
+            width: 100%;
+        }
+
+        /* ===== COMMUNITY ===== */
+        .community-link {
+            display: block;
+            background: rgba(124,58,237,0.06);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .community-link:hover {
+            background: rgba(124,58,237,0.14);
+            border-color: var(--border-hover);
+        }
+
+        /* ===== TOAST ===== */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(10,8,30,0.95);
+            border: 1px solid rgba(124,58,237,0.4);
+            color: #e2e8f0;
+            padding: 10px 24px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 600;
+            z-index: 200;
+            opacity: 0;
+            transition: opacity 0.25s;
+            pointer-events: none;
+            white-space: nowrap;
+            box-shadow: 0 0 30px rgba(124,58,237,0.3);
+            backdrop-filter: blur(12px);
+        }
+
+        /* ===== GLOW NUMBERS ===== */
+        .glow-green { color: #34d399; text-shadow: 0 0 12px rgba(52,211,153,0.4); }
+        .glow-cyan  { color: #22d3ee; text-shadow: 0 0 12px rgba(34,211,238,0.4); }
+        .glow-purple{ color: #a78bfa; text-shadow: 0 0 12px rgba(167,139,250,0.4); }
+        .glow-amber { color: #fbbf24; text-shadow: 0 0 12px rgba(251,191,36,0.4); }
+
+        /* ===== DIVIDER ===== */
+        .galaxy-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(124,58,237,0.4), rgba(6,182,212,0.3), transparent);
+            margin: 6px 0;
+        }
+
+        /* ===== SCROLLBAR ===== */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: rgba(124,58,237,0.4); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(124,58,237,0.6); }
+
+        /* ===== IP TAG ===== */
+        .ip-tag {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 11px;
+            color: var(--muted);
+            letter-spacing: 1px;
+        }
+
+        /* ===== VALUE UPDATE ANIMATION ===== */
+        .value-update { transition: all 0.3s; }
+
+        /* ===== GRID CAT ===== */
+        .cat-mini {
+            background: rgba(124,58,237,0.07);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px;
             text-align: center;
         }
+
+        .cat-mini-label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 9px;
+            color: var(--muted);
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+
+        .cat-mini-val {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        /* pulse dot */
+        @keyframes pulse { 0%,100%{opacity:1}50%{opacity:.4} }
+        .pulse-dot { animation: pulse 1.5s infinite; }
+
+        /* fade-in on load */
+        @keyframes fadeUp { from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none} }
+        .g-card { animation: fadeUp 0.5s ease both; }
+
+        /* stagger delays */
+        .d1{animation-delay:.05s}.d2{animation-delay:.1s}.d3{animation-delay:.15s}
+        .d4{animation-delay:.2s}.d5{animation-delay:.25s}.d6{animation-delay:.3s}
+        .d7{animation-delay:.35s}.d8{animation-delay:.4s}.d9{animation-delay:.45s}
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <div class="logo-container">
-            <i class="fa-solid fa-planet-ringed"></i> 🪐
-        </div>
-        <h1>GalaxyTopia</h1>
-        
-        <p class="about">
-            Welcome to <strong>GalaxyTopia</strong>! A custom Growtopia Private Server built for the best experience. Discover unique features, smooth gameplay, and an amazing community. Download our client and start your journey today!
-        </p>
+<!-- Toast -->
+<div id="toast" class="toast">✅ Copied!</div>
 
-        <div class="links-grid">
-            <a href="https://www.mediafire.com/file/xqtj79ptm8eolqn/GTPS_Cloud.txt/file" target="_blank" class="button">
-                <i class="fa-solid fa-file-code"></i> Virtual Host
-            </a>
-            <a href="https://www.mediafire.com/file/32680m2b458bnpf/GalaxyHost.apk/file" target="_blank" class="button">
-                <i class="fa-brands fa-android"></i> Apk Galaxy Host
-            </a>
-            <a href="https://gtpshost.com/raw/GalaxyTopian" target="_blank" class="button">
-                <i class="fa-solid fa-globe"></i> Ptunnel
-            </a>
-            <a href="https://chat.whatsapp.com/GhRikheZxv77dqmuVjy3Og" target="_blank" class="button">
-                <i class="fa-brands fa-whatsapp"></i> WhatsApp Group
-            </a>
-            <a href="https://discord.gg/xhPTT5AYHj_" target="_blank" class="button">
-                <i class="fa-brands fa-discord"></i> Discord Server
-            </a>
-            <a href="redeem.html" class="button" style="background: rgba(108, 92, 231, 0.1); border-color: var(--primary);">
-                <i class="fa-solid fa-gift"></i> Redeem Codes
-            </a>
-        </div>
+<!-- Nebula -->
+<div class="nebula-bg"></div>
 
-        <div class="report-card">
-            <h3><i class="fa-solid fa-bug"></i> Found a Bug?</h3>
-            <p>Help us keep GalaxyTopia awesome by reporting any bugs directly to the developer.</p>
-            <a href="https://wa.me/6285135690314?text=There%20are%20bug%20like%20this%3A%0A%0AIndonesia%20%2F%20English%3A%0A%0AAccount%20name%3A%0A%0AThere%20are%20Proof%3A%20%28Yes%2FNo%29" target="_blank" class="button btn-danger">
-                Report Bug via WhatsApp
-            </a>
+<!-- Starfield -->
+<canvas id="starfield"></canvas>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+    <div class="logo">
+        <div class="logo-icon">🌌</div>
+        <span class="logo-text">GalaxyTopia</span>
+        <span class="version-tag hidden sm:inline">v1.0</span>
+    </div>
+    <div class="nav-links flex gap-1">
+        <a href="#">Dashboard</a>
+        <a href="#">Hosts</a>
+        <a href="#">Guide</a>
+    </div>
+</nav>
+
+<!-- MAIN -->
+<div class="page-wrap pt-24">
+
+    <!-- HEADER ROW -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <div>
+            <h1 style="font-family:'Orbitron',sans-serif;font-size:1.8rem;font-weight:900;background:linear-gradient(90deg,#a78bfa,#22d3ee);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:1px;">GALAXYTOPIA</h1>
+            <div class="flex items-center gap-3 mt-1">
+                <span id="statusBadge" class="inline-flex items-center gap-1.5 badge-online px-3 py-1 rounded-full text-xs font-semibold">
+                    <span class="w-2 h-2 rounded-full bg-green-400 pulse-dot"></span>
+                    <span>Online</span>
+                </span>
+                <span class="ip-tag" id="serverIp">Loading...</span>
+            </div>
+        </div>
+        <div class="flex gap-2">
+            <div class="stat-mini">
+                <div class="stat-mini-label">ONLINE</div>
+                <div class="stat-mini-val glow-green value-update" id="onlinePlayers">—</div>
+            </div>
+            <div class="stat-mini">
+                <div class="stat-mini-label">WORLDS</div>
+                <div class="stat-mini-val glow-cyan" id="totalWorlds">—</div>
+            </div>
+            <div class="stat-mini">
+                <div class="stat-mini-label">CPU</div>
+                <div class="stat-mini-val glow-amber value-update" id="cpuUsage">—</div>
+            </div>
         </div>
     </div>
 
-    <footer>
-        &copy; 2026 GalaxyTopia. All rights reserved.
-    </footer>
+    <!-- QUICK STATS -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+        <div class="g-card p-3 flex items-center gap-3 d1">
+            <div style="width:36px;height:36px;border-radius:10px;background:rgba(124,58,237,0.15);border:1px solid rgba(124,58,237,0.3);display:flex;align-items:center;justify-content:center;">
+                <i class="fas fa-microchip text-purple-400"></i>
+            </div>
+            <div>
+                <p style="font-size:9px;font-family:'Orbitron',sans-serif;letter-spacing:1px;color:var(--muted);">MEMORY</p>
+                <p class="font-semibold text-sm value-update" id="memoryUsage">— MB</p>
+            </div>
+        </div>
+        <div class="g-card p-3 flex items-center gap-3 d2">
+            <div style="width:36px;height:36px;border-radius:10px;background:rgba(6,182,212,0.1);border:1px solid rgba(6,182,212,0.25);display:flex;align-items:center;justify-content:center;">
+                <i class="fas fa-database text-cyan-400"></i>
+            </div>
+            <div>
+                <p style="font-size:9px;font-family:'Orbitron',sans-serif;letter-spacing:1px;color:var(--muted);">STORAGE</p>
+                <p class="font-semibold text-sm value-update" id="storageUsage">— MB</p>
+            </div>
+        </div>
+        <div class="g-card p-3 flex items-center gap-3 d3">
+            <div style="width:36px;height:36px;border-radius:10px;background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.2);display:flex;align-items:center;justify-content:center;">
+                <i class="fas fa-users text-amber-400"></i>
+            </div>
+            <div>
+                <p style="font-size:9px;font-family:'Orbitron',sans-serif;letter-spacing:1px;color:var(--muted);">MAX PLAYERS</p>
+                <p class="font-semibold text-sm" id="maxPlayers">4000</p>
+            </div>
+        </div>
+        <div class="g-card p-3 flex items-center gap-3 d4">
+            <div style="width:36px;height:36px;border-radius:10px;background:rgba(52,211,153,0.1);border:1px solid rgba(52,211,153,0.2);display:flex;align-items:center;justify-content:center;">
+                <i class="fas fa-clock text-emerald-400"></i>
+            </div>
+            <div>
+                <p style="font-size:9px;font-family:'Orbitron',sans-serif;letter-spacing:1px;color:var(--muted);">UPTIME</p>
+                <p class="font-semibold text-sm" id="uptime">—</p>
+            </div>
+        </div>
+    </div>
 
+    <!-- CHART -->
+    <div class="g-card p-5 mb-6 d5">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="sec-title"><i class="fas fa-chart-line" style="color:#34d399"></i> 24H Player Activity</h2>
+            <span style="font-family:'Orbitron',sans-serif;font-size:10px;color:var(--muted);">LIVE</span>
+        </div>
+        <div class="chart-wrap">
+            <canvas id="playerChart"></canvas>
+        </div>
+        <div class="flex justify-between text-xs mt-2" style="color:var(--muted);font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:1px;">
+            <span>24H AGO</span>
+            <span>12H AGO</span>
+            <span>NOW</span>
+        </div>
+    </div>
+
+    <!-- HEALTH + RECORDS -->
+    <div class="grid md:grid-cols-2 gap-5 mb-6">
+        <div class="g-card p-5 d6">
+            <h2 class="sec-title mb-4"><i class="fas fa-heart-pulse" style="color:#f87171"></i> Server Health</h2>
+            <div class="space-y-4">
+                <div>
+                    <div class="flex justify-between text-xs mb-1">
+                        <span style="color:var(--muted)">CPU Usage</span>
+                        <span class="glow-amber font-semibold" id="cpuPercent">—</span>
+                    </div>
+                    <div class="progress-track">
+                        <div id="cpuBar" class="progress-fill" style="width:0%;background:linear-gradient(90deg,#f59e0b,#fbbf24)"></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="flex justify-between text-xs mb-1">
+                        <span style="color:var(--muted)">Memory Usage</span>
+                        <span class="glow-purple font-semibold" id="memPercent">—</span>
+                    </div>
+                    <div class="progress-track">
+                        <div id="memBar" class="progress-fill" style="width:0%;background:linear-gradient(90deg,#7c3aed,#a78bfa)"></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="flex justify-between text-xs mb-1">
+                        <span style="color:var(--muted)">Storage Usage</span>
+                        <span class="glow-cyan font-semibold" id="storagePercent">—</span>
+                    </div>
+                    <div class="progress-track">
+                        <div id="storageBar" class="progress-fill" style="width:0%;background:linear-gradient(90deg,#0891b2,#22d3ee)"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="g-card p-5 d7">
+            <h2 class="sec-title mb-4"><i class="fas fa-trophy" style="color:#a78bfa"></i> Server Records</h2>
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div style="background:rgba(251,191,36,0.06);border:1px solid rgba(251,191,36,0.15);border-radius:12px;padding:16px;text-align:center;">
+                    <p style="font-size:9px;font-family:'Orbitron',sans-serif;letter-spacing:1px;color:var(--muted);margin-bottom:6px;">RECORD ONLINE</p>
+                    <p class="glow-amber" style="font-family:'Orbitron',sans-serif;font-size:2rem;font-weight:700;" id="recordPlayers">—</p>
+                    <p style="font-size:10px;color:var(--muted);margin-top:2px;">players</p>
+                </div>
+                <div style="background:rgba(6,182,212,0.06);border:1px solid rgba(6,182,212,0.15);border-radius:12px;padding:16px;text-align:center;">
+                    <p style="font-size:9px;font-family:'Orbitron',sans-serif;letter-spacing:1px;color:var(--muted);margin-bottom:6px;">MAX CAPACITY</p>
+                    <p class="glow-cyan" style="font-family:'Orbitron',sans-serif;font-size:2rem;font-weight:700;" id="maxPlayersRecord">2000</p>
+                    <p style="font-size:10px;color:var(--muted);margin-top:2px;">players</p>
+                </div>
+            </div>
+            <div style="background:rgba(255,255,255,0.03);border-radius:10px;padding:12px;">
+                <div class="flex justify-between text-sm mb-2">
+                    <span style="color:var(--muted)">Current Load</span>
+                    <span class="glow-green font-semibold" id="loadText">0%</span>
+                </div>
+                <div class="progress-track">
+                    <div id="loadBar" class="progress-fill" style="width:0%;background:linear-gradient(90deg,#10b981,#34d399)"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- HOSTS + COMMUNITY -->
+    <div class="grid lg:grid-cols-3 gap-5 mb-6">
+        <div class="lg:col-span-2 g-card p-5 d8">
+            <h2 class="sec-title mb-4"><i class="fas fa-plug" style="color:#a78bfa"></i> Connection Hosts</h2>
+            <div class="space-y-3">
+                <div class="host-item">
+                    <div class="flex items-center gap-3">
+                        <i class="fas fa-bolt" style="color:#a78bfa;width:20px"></i>
+                        <div>
+                            <p class="font-semibold">PowerTunnel</p>
+                            <p class="text-xs" style="color:var(--muted)">Android</p>
+                        </div>
+                    </div>
+                    <button onclick="copyHost('ptunel')" class="copy-btn"><i class="far fa-copy"></i><span class="hidden sm:inline">Copy</span></button>
+                </div>
+                <div class="host-item">
+                    <div class="flex items-center gap-3">
+                        <i class="fab fa-apple" style="color:#a78bfa;width:20px;font-size:18px"></i>
+                        <div>
+                            <p class="font-semibold">Surge 5</p>
+                            <p class="text-xs" style="color:var(--muted)">iOS</p>
+                        </div>
+                    </div>
+                    <button onclick="copyHost('surge')" class="copy-btn"><i class="far fa-copy"></i><span class="hidden sm:inline">Copy</span></button>
+                </div>
+                <div class="host-item">
+                    <div class="flex items-center gap-3">
+                        <i class="fas fa-network-wired" style="color:#a78bfa;width:20px"></i>
+                        <div>
+                            <p class="font-semibold">Virtual Host</p>
+                            <p class="text-xs" style="color:var(--muted)">Android / PC</p>
+                        </div>
+                    </div>
+                    <button onclick="copyHost('vhost')" class="copy-btn"><i class="far fa-copy"></i><span class="hidden sm:inline">Copy</span></button>
+                </div>
+                <div class="host-item">
+                    <div class="flex items-center gap-3">
+                        <i class="fab fa-windows" style="color:#a78bfa;width:20px"></i>
+                        <div>
+                            <p class="font-semibold">Windows Hosts</p>
+                            <p class="text-xs" style="color:var(--muted)">PC</p>
+                        </div>
+                    </div>
+                    <button onclick="copyHost('windows')" class="copy-btn"><i class="far fa-copy"></i><span class="hidden sm:inline">Copy</span></button>
+                </div>
+                <div class="host-item">
+                    <div class="flex items-center gap-3">
+                        <i class="fas fa-android" style="color:#a78bfa;width:20px"></i>
+                        <div>
+                            <p class="font-semibold">GalaxyTopia Custom APK</p>
+                            <p class="text-xs" style="color:var(--muted)">Android · Direct download</p>
+                        </div>
+                    </div>
+                    <a href="#" target="_blank" class="dl-btn"><i class="fas fa-download"></i><span class="hidden sm:inline">Download</span></a>
+                </div>
+            </div>
+        </div>
+
+        <div class="g-card p-5 d9 flex flex-col gap-4">
+            <h2 class="sec-title"><i class="fas fa-users" style="color:#22d3ee"></i> Community</h2>
+            <a id="whatsappLink" href="#" target="_blank" class="community-link">
+                <div class="flex items-center gap-3">
+                    <i class="fab fa-whatsapp text-2xl" style="color:#25D366"></i>
+                    <div class="flex-1">
+                        <p class="font-semibold">WhatsApp Group</p>
+                        <p class="text-xs" style="color:var(--muted)">PUBLIC CHAT || GALAXYTOPIA</p>
+                    </div>
+                    <i class="fas fa-arrow-right text-sm" style="color:var(--muted)"></i>
+                </div>
+            </a>
+            <a href="https://discord.gg/BEDfw6JBZ" target="_blank" class="community-link">
+                <div class="flex items-center gap-3">
+                    <i class="fab fa-discord text-2xl" style="color:#5865F2"></i>
+                    <div class="flex-1">
+                        <p class="font-semibold">Discord Server</p>
+                        <p class="text-xs" style="color:var(--muted)">discord.gg/BEDfw6JBZ</p>
+                    </div>
+                    <i class="fas fa-arrow-right text-sm" style="color:var(--muted)"></i>
+                </div>
+            </a>
+            <div style="background:rgba(124,58,237,0.06);border:1px solid var(--border);border-radius:10px;padding:12px;">
+                <p style="font-size:11px;font-weight:600;margin-bottom:8px;font-family:'Orbitron',sans-serif;color:#a78bfa;letter-spacing:0.5px;">📖 QUICK GUIDE</p>
+                <p style="font-size:11px;color:var(--muted);margin-bottom:4px;">• Android: PowerTunnel / Custom APK</p>
+                <p style="font-size:11px;color:var(--muted);margin-bottom:4px;">• iOS: Surge 5</p>
+                <p style="font-size:11px;color:var(--muted);">• PC: Virtual Host / Hosts file</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- WORLD CATEGORIES -->
+    <div class="grid md:grid-cols-3 gap-5 mb-6">
+        <div class="g-card p-5">
+            <h2 class="sec-title mb-4"><i class="fas fa-layer-group" style="color:#34d399"></i> World Categories</h2>
+            <div class="grid grid-cols-3 gap-2">
+                <div class="cat-mini">
+                    <div class="cat-mini-label">STARTS</div>
+                    <div class="cat-mini-val glow-green" id="startsWorlds">0</div>
+                </div>
+                <div class="cat-mini">
+                    <div class="cat-mini-label">BFG</div>
+                    <div class="cat-mini-val glow-purple" id="bfgWorlds">0</div>
+                </div>
+                <div class="cat-mini">
+                    <div class="cat-mini-label">SHOP</div>
+                    <div class="cat-mini-val glow-amber" id="shopWorlds">0</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="g-card p-5">
+            <h2 class="sec-title mb-4"><i class="fas fa-chart-pie" style="color:#a78bfa"></i> World Status</h2>
+            <div class="space-y-3">
+                <div>
+                    <div class="flex justify-between text-sm mb-1">
+                        <span style="color:var(--muted)">Active Worlds</span>
+                        <span class="glow-green font-semibold" id="activeWorldsCount">0</span>
+                    </div>
+                    <div class="progress-track">
+                        <div id="activeWorldsBar" class="progress-fill" style="width:0%;background:linear-gradient(90deg,#10b981,#34d399)"></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="flex justify-between text-sm mb-1">
+                        <span style="color:var(--muted)">Empty Worlds</span>
+                        <span class="font-semibold" style="color:var(--muted)" id="emptyWorldsCount">0</span>
+                    </div>
+                    <div class="progress-track">
+                        <div id="emptyWorldsBar" class="progress-fill" style="width:100%;background:rgba(100,116,139,0.4)"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="g-card p-5">
+            <h2 class="sec-title mb-4"><i class="fas fa-crown" style="color:#fbbf24"></i> Top Worlds</h2>
+            <div id="topWorldsList" class="space-y-2">
+                <div class="text-center text-sm" style="color:var(--muted)">Loading...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SETUP GUIDES -->
+    <div class="g-card p-5 mb-6">
+        <h2 class="sec-title mb-4"><i class="fas fa-book-open" style="color:#a78bfa"></i> Setup Guides</h2>
+        <div class="grid md:grid-cols-2 gap-5">
+            <div style="border-left:2px solid rgba(124,58,237,0.4);padding-left:16px;">
+                <p class="font-semibold mb-2 flex items-center gap-2"><i class="fab fa-android" style="color:#a78bfa"></i> Android</p>
+                <ol class="text-xs list-decimal ml-4 space-y-1" style="color:var(--muted)">
+                    <li>Gunakan <span style="color:#e2e8f0">PowerTunnel</span> atau download <span style="color:#e2e8f0">Custom APK</span></li>
+                    <li>Klik copy pada PowerTunnel → paste di app</li>
+                    <li>Untuk Virtual Host: copy host entries</li>
+                    <li>Login ke Growtopia!</li>
+                </ol>
+            </div>
+            <div style="border-left:2px solid rgba(6,182,212,0.4);padding-left:16px;">
+                <p class="font-semibold mb-2 flex items-center gap-2"><i class="fab fa-apple" style="color:#22d3ee"></i> iOS</p>
+                <ol class="text-xs list-decimal ml-4 space-y-1" style="color:var(--muted)">
+                    <li>Install <span style="color:#e2e8f0">Surge 5</span> dari App Store</li>
+                    <li>Copy Surge host → Import Profile from URL</li>
+                    <li>Setup VPN → Allow configuration</li>
+                    <li>Buka Growtopia, selesai!</li>
+                </ol>
+            </div>
+            <div style="border-left:2px solid rgba(124,58,237,0.4);padding-left:16px;">
+                <p class="font-semibold mb-2 flex items-center gap-2"><i class="fab fa-windows" style="color:#a78bfa"></i> Windows</p>
+                <ol class="text-xs list-decimal ml-4 space-y-1" style="color:var(--muted)">
+                    <li>Tekan <span style="color:#e2e8f0">Win + R</span>, ketik: <code style="background:rgba(0,0,0,0.3);padding:1px 4px;border-radius:4px">C:\Windows\System32\drivers\etc</code></li>
+                    <li>Edit file <span style="color:#e2e8f0">hosts</span> dengan Notepad</li>
+                    <li>Copy Windows hosts entries → paste di bawah</li>
+                    <li>Simpan dan login</li>
+                </ol>
+            </div>
+            <div style="border-left:2px solid rgba(6,182,212,0.4);padding-left:16px;">
+                <p class="font-semibold mb-2 flex items-center gap-2"><i class="fas fa-network-wired" style="color:#22d3ee"></i> Virtual Host</p>
+                <ol class="text-xs list-decimal ml-4 space-y-1" style="color:var(--muted)">
+                    <li>Copy Virtual Host entries</li>
+                    <li>Buka aplikasi Virtual Host di Android/PC</li>
+                    <li>Paste dan apply</li>
+                    <li>Connect ke server</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <!-- ACTIVE WORLDS -->
+    <div class="g-card p-5 mb-6">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="sec-title"><i class="fas fa-globe" style="color:#22d3ee"></i> Active Worlds</h2>
+            <span style="font-family:'Orbitron',sans-serif;font-size:10px;color:var(--muted);background:rgba(124,58,237,0.1);border:1px solid var(--border);padding:3px 10px;border-radius:999px;" id="worldsCount">0 worlds</span>
+        </div>
+        <div id="worldsContainer" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+            <div class="world-card" style="animation:pulse 1.5s infinite"><div style="height:14px;background:rgba(124,58,237,0.15);border-radius:4px;margin-bottom:6px"></div><div style="height:10px;background:rgba(124,58,237,0.08);border-radius:4px;width:60%;margin:0 auto"></div></div>
+            <div class="world-card" style="animation:pulse 1.5s infinite"><div style="height:14px;background:rgba(124,58,237,0.15);border-radius:4px;margin-bottom:6px"></div><div style="height:10px;background:rgba(124,58,237,0.08);border-radius:4px;width:60%;margin:0 auto"></div></div>
+        </div>
+    </div>
+
+    <!-- SERVER TEAM (kosong) -->
+    <div class="g-card p-5 mb-6">
+        <h2 class="sec-title mb-4"><i class="fas fa-crown" style="color:#fbbf24"></i> Server Team</h2>
+        <div class="grid md:grid-cols-2 gap-6">
+            <div>
+                <div class="flex items-center gap-2 mb-3">
+                    <i class="fas fa-crown text-sm" style="color:#fbbf24"></i>
+                    <h3 class="font-semibold" style="color:#cbd5e1;font-family:'Orbitron',sans-serif;font-size:11px;letter-spacing:1px;">OWNERS</h3>
+                </div>
+                <div id="ownersList" class="space-y-2">
+                    <div style="color:var(--muted);font-size:13px;text-align:center;padding:20px;background:rgba(124,58,237,0.04);border:1px dashed rgba(124,58,237,0.15);border-radius:10px;">
+                        <i class="fas fa-user-slash mb-2" style="display:block;font-size:1.2rem;color:rgba(124,58,237,0.3)"></i>
+                        Belum ada owner
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div class="flex items-center gap-2 mb-3">
+                    <i class="fas fa-star text-sm" style="color:#22d3ee"></i>
+                    <h3 class="font-semibold" style="color:#cbd5e1;font-family:'Orbitron',sans-serif;font-size:11px;letter-spacing:1px;">CO-OWNERS</h3>
+                </div>
+                <div id="coOwnersList" class="space-y-2">
+                    <div style="color:var(--muted);font-size:13px;text-align:center;padding:20px;background:rgba(6,182,212,0.04);border:1px dashed rgba(6,182,212,0.15);border-radius:10px;">
+                        <i class="fas fa-user-slash mb-2" style="display:block;font-size:1.2rem;color:rgba(6,182,212,0.3)"></i>
+                        Belum ada co-owner
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FAQ -->
+    <div class="g-card p-5 mb-6">
+        <h2 class="sec-title mb-4"><i class="fas fa-question-circle" style="color:#22d3ee"></i> Frequently Asked Questions</h2>
+        <div id="faqContainer" class="space-y-0">
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <span>🌌 Apa itu GalaxyTopia?</span>
+                    <i class="fas fa-chevron-down faq-icon"></i>
+                </div>
+                <div class="faq-answer hidden">GalaxyTopia adalah private server Growtopia yang menyediakan pengalaman bermain berbeda dengan fitur-fitur eksklusif dan komunitas yang aktif.</div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <span>❓ Apa itu Growsoft?</span>
+                    <i class="fas fa-chevron-down faq-icon"></i>
+                </div>
+                <div class="faq-answer hidden">Growsoft adalah platform atau launcher yang memudahkan akses ke private server Growtopia seperti GalaxyTopia. Tersedia untuk Windows dan Android, tanpa perlu atur hosts file manual.</div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <span>🚀 Gimana cara join server GalaxyTopia?</span>
+                    <i class="fas fa-chevron-down faq-icon"></i>
+                </div>
+                <div class="faq-answer hidden">
+                    Ada beberapa cara:<br>
+                    • <span style="color:#e2e8f0">Android:</span> Gunakan PowerTunnel atau download Custom APK GalaxyTopia<br>
+                    • <span style="color:#e2e8f0">iOS:</span> Gunakan Surge 5 dengan mengcopy profile host<br>
+                    • <span style="color:#e2e8f0">PC:</span> Edit hosts file atau gunakan Virtual Host<br><br>
+                    Semua panduan ada di bagian Setup Guides di atas.
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <span>⭐ Fitur apa aja yang ada di GalaxyTopia?</span>
+                    <i class="fas fa-chevron-down faq-icon"></i>
+                </div>
+                <div class="faq-answer hidden">
+                    Server GalaxyTopia memiliki berbagai fitur unggulan:<br>
+                    • ✅ Level dan world unlimited<br>
+                    • ✅ Drop rate yang lebih tinggi<br>
+                    • ✅ Event rutin setiap minggu<br>
+                    • ✅ Admin aktif 24/7<br>
+                    • ✅ World khusus STARTS untuk pemula<br>
+                    • ✅ BFG world untuk farming cepat<br>
+                    • ✅ SHOP world dengan harga terjangkau
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <span>🛡️ Server GalaxyTopia aman gak?</span>
+                    <i class="fas fa-chevron-down faq-icon"></i>
+                </div>
+                <div class="faq-answer hidden">Sangat aman! Tim admin selalu memantau server 24/7 dan melakukan backup data secara rutin. Kami menggunakan sistem keamanan berlapis untuk melindungi data pemain.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="text-center" style="font-family:'Orbitron',sans-serif;font-size:10px;color:rgba(100,116,139,0.6);letter-spacing:1px;">
+        GALAXYTOPIA DASHBOARD · REAL-TIME DATA · LAST UPDATE: <span id="lastUpdate">—</span>
+    </div>
+</div>
+
+<script>
+    // ==================== STARFIELD ====================
+    (function() {
+        const canvas = document.getElementById('starfield');
+        const ctx = canvas.getContext('2d');
+        let stars = [];
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        function initStars() {
+            stars = [];
+            const count = Math.floor((canvas.width * canvas.height) / 4000);
+            for (let i = 0; i < count; i++) {
+                stars.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    r: Math.random() * 1.2 + 0.2,
+                    a: Math.random(),
+                    da: (Math.random() - 0.5) * 0.005,
+                    speed: Math.random() * 0.05
+                });
+            }
+        }
+
+        function drawStars() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            stars.forEach(s => {
+                s.a += s.da;
+                if (s.a <= 0 || s.a >= 1) s.da *= -1;
+                s.y += s.speed;
+                if (s.y > canvas.height) s.y = 0;
+
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(180,180,255,${s.a * 0.7})`;
+                ctx.fill();
+            });
+            requestAnimationFrame(drawStars);
+        }
+
+        resize();
+        initStars();
+        drawStars();
+        window.addEventListener('resize', () => { resize(); initStars(); });
+    })();
+
+    // ==================== CONFIG ====================
+    const API_MAIN   = 'https://api.gtps.cloud/api/server/public/297';
+    const API_STATUS = 'https://api.gtps.cloud/g-api/297/status';
+    const API_WORLDS = 'https://api.gtps.cloud/g-api/297/worlds';
+    const WA_LINK    = 'https://chat.whatsapp.com/HuWiXSaje59Jdvbq2QW7UC?mode=gi_t';
+
+    const HOSTS = {
+        ptunel:  'https://dash.gtps.cloud/android/297',
+        surge:   'https://dash.gtps.cloud/ios/297',
+        vhost:   '91.134.85.13 growtopia1.com\n91.134.85.13 growtopia2.com\n91.134.85.13 www.growtopia1.com\n91.134.85.13 www.growtopia2.com',
+        windows: '5.39.46.35 growtopia1.com\n5.39.46.35 growtopia2.com\n5.39.46.35 www.growtopia1.com\n5.39.46.35 www.growtopia2.com'
+    };
+
+    let playerChart = null;
+
+    // ==================== HELPERS ====================
+    function showToast(msg = '✅ Copied!') {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.style.opacity = '1';
+        setTimeout(() => t.style.opacity = '0', 2000);
+    }
+
+    async function copyHost(type) {
+        const text = HOSTS[type];
+        if (!text) return;
+        try {
+            await navigator.clipboard.writeText(text);
+            showToast('✅ Host copied!');
+        } catch {
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+            showToast('✅ Host copied!');
+        }
+    }
+
+    function toggleFaq(el) {
+        const item = el.closest('.faq-item');
+        const ans  = item.querySelector('.faq-answer');
+        ans.classList.toggle('hidden');
+        item.classList.toggle('open');
+        document.querySelectorAll('.faq-item').forEach(i => {
+            if (i !== item && i.classList.contains('open')) {
+                i.querySelector('.faq-answer').classList.add('hidden');
+                i.classList.remove('open');
+            }
+        });
+    }
+
+    function formatUptime(s) {
+        if (!s) return '—';
+        const d = Math.floor(s / 86400);
+        const h = Math.floor((s % 86400) / 3600);
+        const m = Math.floor((s % 3600) / 60);
+        return d > 0 ? `${d}d ${h}h ${m}m` : `${h}h ${m}m`;
+    }
+
+    async function fetchJSON(url) {
+        try {
+            const r = await fetch(url, { cache: 'no-store' });
+            if (!r.ok) return null;
+            return await r.json();
+        } catch { return null; }
+    }
+
+    // ==================== CHART ====================
+    function initChart() {
+        const labels = [];
+        const data   = [];
+        const now    = new Date();
+        for (let i = 24; i >= 0; i--) {
+            const d = new Date(now - i * 3600000);
+            labels.push(`${String(d.getHours()).padStart(2,'0')}:00`);
+            data.push(0);
+        }
+
+        const ctx2 = document.getElementById('playerChart').getContext('2d');
+        const grad = ctx2.createLinearGradient(0, 0, 0, 200);
+        grad.addColorStop(0, 'rgba(124,58,237,0.4)');
+        grad.addColorStop(1, 'rgba(124,58,237,0)');
+
+        playerChart = new Chart(ctx2, {
+            type: 'line',
+            data: {
+                labels,
+                datasets: [{
+                    data,
+                    borderColor: '#7c3aed',
+                    backgroundColor: grad,
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4,
+                    pointBorderColor: '#04030d',
+                    pointBackgroundColor: '#a78bfa',
+                    pointRadius: 3,
+                    pointHoverRadius: 5
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: 'rgba(10,8,30,0.95)',
+                        titleColor: '#e2e8f0',
+                        bodyColor: '#94a3b8',
+                        borderColor: 'rgba(124,58,237,0.4)',
+                        borderWidth: 1
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { color: 'rgba(124,58,237,0.07)', display: false },
+                        ticks: { color: '#475569', maxRotation: 45, minRotation: 45 }
+                    },
+                    y: {
+                        grid: { color: 'rgba(124,58,237,0.07)' },
+                        ticks: { color: '#475569', stepSize: 5 },
+                        min: 0, max: 40
+                    }
+                }
+            }
+        });
+    }
+
+    function updateChart(val) {
+        if (!playerChart) return;
+        playerChart.data.datasets[0].data.push(val);
+        playerChart.data.datasets[0].data.shift();
+        playerChart.update('none');
+    }
+
+    // ==================== UPDATE UI ====================
+    async function updateStats() {
+        const [main, status, worldsData] = await Promise.all([
+            fetchJSON(API_MAIN),
+            fetchJSON(API_STATUS),
+            fetchJSON(API_WORLDS)
+        ]);
+
+        let currentPlayers = 0;
+
+        if (main) {
+            const state = main.state || {};
+            const tier  = main.tier_info || {};
+            const isOnline = state.server_status === 1;
+
+            const badge = document.getElementById('statusBadge');
+            badge.className = `inline-flex items-center gap-1.5 ${isOnline ? 'badge-online' : 'badge-offline'} px-3 py-1 rounded-full text-xs font-semibold`;
+            badge.innerHTML = `<span class="w-2 h-2 rounded-full ${isOnline ? 'bg-green-400 pulse-dot' : 'bg-red-400'}"></span><span>${isOnline ? 'Online' : 'Offline'}</span>`;
+
+            currentPlayers = state.players_online || 0;
+            document.getElementById('onlinePlayers').textContent = currentPlayers;
+            document.getElementById('cpuUsage').textContent = (state.cpu_usage || 0).toFixed(1) + '%';
+            document.getElementById('memoryUsage').textContent = (state.memory_usage || 0) + ' MB';
+            document.getElementById('storageUsage').textContent = Math.round(state.storage_usage || 0) + ' MB';
+            document.getElementById('maxPlayers').textContent = tier.max_players_online || 4000;
+
+            // IP
+            if (main.server_host) {
+                document.getElementById('serverIp').textContent = main.server_host;
+            }
+
+            const cpu = state.cpu_usage || 0;
+            document.getElementById('cpuPercent').textContent = cpu.toFixed(1) + '%';
+            document.getElementById('cpuBar').style.width = cpu + '%';
+
+            const memMB = state.memory_usage || 0;
+            const memP  = Math.min(100, Math.round((memMB / 4096) * 100));
+            document.getElementById('memPercent').textContent = memP + '%';
+            document.getElementById('memBar').style.width = memP + '%';
+
+            const stoMB = state.storage_usage || 0;
+            const stoP  = Math.min(100, Math.round((stoMB / 2048) * 100));
+            document.getElementById('storagePercent').textContent = stoP + '%';
+            document.getElementById('storageBar').style.width = stoP + '%';
+        }
+
+        if (status) {
+            document.getElementById('recordPlayers').textContent = status.max_online || '—';
+            if (status.max_players) document.getElementById('maxPlayersRecord').textContent = status.max_players;
+            if (status.uptime)      document.getElementById('uptime').textContent = formatUptime(status.uptime);
+            if (status.players_online) currentPlayers = status.players_online;
+
+            if (status.players_online && status.max_players) {
+                const lp = (status.players_online / status.max_players) * 100;
+                document.getElementById('loadBar').style.width = lp + '%';
+                document.getElementById('loadText').textContent = lp.toFixed(1) + '%';
+            }
+
+            if (!main && status.players_online !== undefined) {
+                document.getElementById('onlinePlayers').textContent = status.players_online;
+            }
+        }
+
+        if (worldsData?.worlds) {
+            const list = worldsData.worlds;
+            document.getElementById('totalWorlds').textContent = worldsData.total_worlds || list.length;
+            document.getElementById('worldsCount').textContent = list.length + ' worlds';
+
+            const startsW = list.filter(w => w.name.startsWith('START')).length;
+            const bfgW    = list.filter(w => w.name.includes('BFG')).length;
+            const shopW   = list.filter(w => w.name.includes('SHOP') || w.name.includes('BUY')).length;
+            document.getElementById('startsWorlds').textContent = startsW;
+            document.getElementById('bfgWorlds').textContent   = bfgW;
+            document.getElementById('shopWorlds').textContent  = shopW;
+
+            const active = list.filter(w => w.players > 0).length;
+            const empty  = list.length - active;
+            document.getElementById('activeWorldsCount').textContent = active;
+            document.getElementById('emptyWorldsCount').textContent = empty;
+            const ap = (active / list.length) * 100;
+            document.getElementById('activeWorldsBar').style.width = ap + '%';
+            document.getElementById('emptyWorldsBar').style.width = (100 - ap) + '%';
+
+            // Top worlds
+            const top = [...list].sort((a,b) => b.players - a.players).slice(0, 3);
+            const colors = ['#fbbf24', '#94a3b8', '#f97316'];
+            document.getElementById('topWorldsList').innerHTML = top.map((w, i) => `
+                <div class="flex items-center justify-between text-sm">
+                    <span class="flex items-center gap-2">
+                        <span style="font-family:'Orbitron',sans-serif;font-size:11px;color:${colors[i]}">#${i+1}</span>
+                        <span>${w.name}</span>
+                    </span>
+                    <span style="color:var(--muted)">${w.players || 0} 👥</span>
+                </div>
+            `).join('');
+
+            // World cards
+            document.getElementById('worldsContainer').innerHTML = [...list]
+                .sort((a,b) => b.players - a.players)
+                .map(w => `
+                    <div class="world-card" onclick="showToast('🌍 ${w.name} — ${w.players || 0} players')">
+                        <p class="font-semibold text-sm" style="color:#e2e8f0">${w.name}</p>
+                        <span class="text-xs" style="color:var(--muted)">👥 ${w.players || 0}</span>
+                    </div>
+                `).join('');
+        }
+
+        if (currentPlayers > 0) updateChart(currentPlayers);
+        document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('id-ID');
+    }
+
+    // ==================== INIT ====================
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('whatsappLink').href = WA_LINK;
+        initChart();
+        updateStats();
+        setInterval(updateStats, 5000);
+    });
+</script>
 </body>
 </html>
