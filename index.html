@@ -693,7 +693,7 @@
                         </div>
                     </div>
                     <div class="flex gap-2 w-full">
-                        <a href="GalaxyPCHost.exe" download="GalaxyPCHost.exe" class="dl-btn flex-1 justify-center">
+                        <a href="https://www.mediafire.com/file/0oyfw4lxewbg069/GalaxyPCHost.exe/file" target="_blank" class="dl-btn flex-1 justify-center">
                             <i class="fab fa-windows"></i> Download APP for Windows
                         </a>
                         <a href="GalaxyHost.apk" download="GalaxyHost.apk" class="dl-btn flex-1 justify-center" style="background:rgba(6,182,212,0.12);border-color:rgba(6,182,212,0.3);color:#67e8f9;">
@@ -847,43 +847,18 @@
         <h2 class="sec-title mb-5"><i class="fas fa-crown" style="color:#fbbf24"></i> Server Team</h2>
         <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
 
-            <!-- De Facto Owner -->
+            <!-- Owner + Scripter (orang sama: TheFools) -->
             <div class="staff-card">
                 <div class="staff-avatar avatar-owner" style="background:linear-gradient(135deg,#92400e,#b45309);border-color:rgba(251,191,36,0.5);box-shadow:0 0 14px rgba(251,191,36,0.35);">T</div>
                 <div class="flex-1">
                     <div class="flex items-center gap-2 flex-wrap">
                         <p class="font-semibold">TheFools</p>
-                        <span style="background:rgba(251,191,36,0.12);border:1px solid rgba(251,191,36,0.3);color:#fbbf24;font-size:9px;padding:2px 7px;border-radius:999px;font-family:'Orbitron',sans-serif;letter-spacing:0.5px;">DE FACTO OWNER</span>
+                        <span style="background:rgba(251,191,36,0.12);border:1px solid rgba(251,191,36,0.3);color:#fbbf24;font-size:9px;padding:2px 7px;border-radius:999px;font-family:'Orbitron',sans-serif;letter-spacing:0.5px;">OWNER</span>
+                        <span style="background:rgba(52,211,153,0.1);border:1px solid rgba(52,211,153,0.25);color:#34d399;font-size:9px;padding:2px 7px;border-radius:999px;font-family:'Orbitron',sans-serif;letter-spacing:0.5px;">SCRIPTER</span>
                     </div>
                     <p class="text-xs mt-0.5" style="color:var(--muted)">@TheFools</p>
                 </div>
                 <i class="fas fa-gem" style="color:rgba(251,191,36,0.4)"></i>
-            </div>
-
-            <!-- Co-Owner -->
-            <div class="staff-card">
-                <div class="staff-avatar avatar-owner" style="background:linear-gradient(135deg,#4c1d95,#6d28d9);">S</div>
-                <div class="flex-1">
-                    <div class="flex items-center gap-2 flex-wrap">
-                        <p class="font-semibold">Supports</p>
-                        <span class="badge-owner">CO-OWNER</span>
-                    </div>
-                    <p class="text-xs mt-0.5" style="color:var(--muted)">@Supports</p>
-                </div>
-                <i class="fas fa-shield-alt" style="color:rgba(167,139,250,0.4)"></i>
-            </div>
-
-            <!-- Scripter -->
-            <div class="staff-card">
-                <div class="staff-avatar" style="background:linear-gradient(135deg,#065f46,#047857);border:2px solid rgba(52,211,153,0.4);color:#6ee7b7;box-shadow:0 0 12px rgba(52,211,153,0.25);">T</div>
-                <div class="flex-1">
-                    <div class="flex items-center gap-2 flex-wrap">
-                        <p class="font-semibold">The Fools</p>
-                        <span style="background:rgba(52,211,153,0.1);border:1px solid rgba(52,211,153,0.25);color:#34d399;font-size:9px;padding:2px 7px;border-radius:999px;font-family:'Orbitron',sans-serif;letter-spacing:0.5px;">SCRIPTER</span>
-                    </div>
-                    <p class="text-xs mt-0.5" style="color:var(--muted)">@The Fools</p>
-                </div>
-                <i class="fas fa-code" style="color:rgba(52,211,153,0.4)"></i>
             </div>
 
             <!-- Staff -->
@@ -1090,7 +1065,10 @@
 
     async function fetchJSON(url) {
         try {
-            const r = await fetch(url, { cache: 'no-store' });
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 8000);
+            const r = await fetch(url, { cache: 'no-store', signal: controller.signal });
+            clearTimeout(timeout);
             if (!r.ok) return null;
             return await r.json();
         } catch { return null; }
@@ -1166,89 +1144,101 @@
 
     // ==================== UPDATE UI ====================
     async function updateStats() {
-        const [main, status, worldsData] = await Promise.all([
+        // API utama: /api/server/public/297 — struktur: { data: { state, tier_info, ... } } atau langsung { state, ... }
+        const [mainRaw, status, worldsData] = await Promise.all([
             fetchJSON(API_MAIN),
             fetchJSON(API_STATUS),
             fetchJSON(API_WORLDS)
         ]);
 
+        // Normalise — coba berbagai kemungkinan struktur
+        const main = mainRaw?.data || mainRaw;
+
         let currentPlayers = 0;
 
         if (main) {
-            const state = main.state || {};
+            // state bisa di root atau di main.state
+            const state = main.state || main;
             const tier  = main.tier_info || {};
-            const isOnline = state.server_status === 1;
+
+            // server_status: 1 = online, atau string 'online'
+            const isOnline = state.server_status === 1 || state.server_status === 'online' || state.status === 'online' || state.online === true;
 
             const badge = document.getElementById('statusBadge');
             badge.className = `inline-flex items-center gap-1.5 ${isOnline ? 'badge-online' : 'badge-offline'} px-3 py-1 rounded-full text-xs font-semibold`;
             badge.innerHTML = `<span class="w-2 h-2 rounded-full ${isOnline ? 'bg-green-400 pulse-dot' : 'bg-red-400'}"></span><span>${isOnline ? 'Online' : 'Offline'}</span>`;
 
-            currentPlayers = state.players_online || 0;
+            currentPlayers = state.players_online || state.online_players || state.players || 0;
             document.getElementById('onlinePlayers').textContent = currentPlayers;
-            document.getElementById('cpuUsage').textContent = (state.cpu_usage || 0).toFixed(1) + '%';
-            document.getElementById('memoryUsage').textContent = (state.memory_usage || 0) + ' MB';
-            document.getElementById('storageUsage').textContent = Math.round(state.storage_usage || 0) + ' MB';
-            document.getElementById('maxPlayers').textContent = tier.max_players_online || 4000;
+            document.getElementById('cpuUsage').textContent = ((state.cpu_usage || state.cpu || 0)).toFixed ? (state.cpu_usage || state.cpu || 0).toFixed(1) + '%' : '—';
+            document.getElementById('memoryUsage').textContent = (state.memory_usage || state.memory || state.ram || 0) + ' MB';
+            document.getElementById('storageUsage').textContent = Math.round(state.storage_usage || state.storage || state.disk || 0) + ' MB';
+            document.getElementById('maxPlayers').textContent = tier.max_players_online || main.max_players || 4000;
 
-            // IP
-            if (main.server_host) {
-                document.getElementById('serverIp').textContent = main.server_host;
+            if (main.server_host || main.ip || main.host) {
+                document.getElementById('serverIp').textContent = main.server_host || main.ip || main.host;
             }
 
-            const cpu = state.cpu_usage || 0;
+            const cpu = parseFloat(state.cpu_usage || state.cpu || 0);
             document.getElementById('cpuPercent').textContent = cpu.toFixed(1) + '%';
-            document.getElementById('cpuBar').style.width = cpu + '%';
+            document.getElementById('cpuBar').style.width = Math.min(cpu, 100) + '%';
 
-            const memMB = state.memory_usage || 0;
+            const memMB = parseFloat(state.memory_usage || state.memory || state.ram || 0);
             const memP  = Math.min(100, Math.round((memMB / 4096) * 100));
             document.getElementById('memPercent').textContent = memP + '%';
             document.getElementById('memBar').style.width = memP + '%';
 
-            const stoMB = state.storage_usage || 0;
+            const stoMB = parseFloat(state.storage_usage || state.storage || state.disk || 0);
             const stoP  = Math.min(100, Math.round((stoMB / 2048) * 100));
             document.getElementById('storagePercent').textContent = stoP + '%';
             document.getElementById('storageBar').style.width = stoP + '%';
+        } else {
+            // Tidak ada data — tampilkan offline
+            document.getElementById('statusBadge').className = 'inline-flex items-center gap-1.5 badge-offline px-3 py-1 rounded-full text-xs font-semibold';
+            document.getElementById('statusBadge').innerHTML = '<span class="w-2 h-2 rounded-full bg-red-400"></span><span>Offline</span>';
         }
 
         if (status) {
-            document.getElementById('recordPlayers').textContent = status.max_online || '—';
-            if (status.max_players) document.getElementById('maxPlayersRecord').textContent = status.max_players;
-            if (status.uptime)      document.getElementById('uptime').textContent = formatUptime(status.uptime);
-            if (status.players_online) currentPlayers = status.players_online;
-
-            if (status.players_online && status.max_players) {
-                const lp = (status.players_online / status.max_players) * 100;
+            const rec = status.max_online || status.record_online || status.peak_players || status.max_players_ever || '—';
+            document.getElementById('recordPlayers').textContent = rec;
+            if (status.max_players || status.slots) document.getElementById('maxPlayersRecord').textContent = status.max_players || status.slots;
+            if (status.uptime) document.getElementById('uptime').textContent = formatUptime(status.uptime);
+            if (status.players_online || status.online) {
+                const pl = status.players_online || status.online || 0;
+                currentPlayers = currentPlayers || pl;
+                if (!main) document.getElementById('onlinePlayers').textContent = pl;
+            }
+            if ((status.players_online || status.online) && (status.max_players || status.slots)) {
+                const pl = status.players_online || status.online || 0;
+                const mx = status.max_players || status.slots || 1;
+                const lp = (pl / mx) * 100;
                 document.getElementById('loadBar').style.width = lp + '%';
                 document.getElementById('loadText').textContent = lp.toFixed(1) + '%';
             }
-
-            if (!main && status.players_online !== undefined) {
-                document.getElementById('onlinePlayers').textContent = status.players_online;
-            }
         }
 
-        if (worldsData?.worlds) {
-            const list = worldsData.worlds;
-            document.getElementById('totalWorlds').textContent = worldsData.total_worlds || list.length;
-            document.getElementById('worldsCount').textContent = list.length + ' worlds';
+        // Worlds — bisa array langsung atau { worlds: [...] }
+        const worlds = worldsData?.worlds || (Array.isArray(worldsData) ? worldsData : null);
+        if (worlds && worlds.length > 0) {
+            document.getElementById('totalWorlds').textContent = worldsData?.total_worlds || worlds.length;
+            document.getElementById('worldsCount').textContent = worlds.length + ' worlds';
 
-            const startsW = list.filter(w => w.name.startsWith('START')).length;
-            const bfgW    = list.filter(w => w.name.includes('BFG')).length;
-            const shopW   = list.filter(w => w.name.includes('SHOP') || w.name.includes('BUY')).length;
+            const startsW = worlds.filter(w => w.name?.startsWith('START')).length;
+            const bfgW    = worlds.filter(w => w.name?.includes('BFG')).length;
+            const shopW   = worlds.filter(w => w.name?.includes('SHOP') || w.name?.includes('BUY')).length;
             document.getElementById('startsWorlds').textContent = startsW;
             document.getElementById('bfgWorlds').textContent   = bfgW;
             document.getElementById('shopWorlds').textContent  = shopW;
 
-            const active = list.filter(w => w.players > 0).length;
-            const empty  = list.length - active;
+            const active = worlds.filter(w => (w.players || w.online || 0) > 0).length;
+            const empty  = worlds.length - active;
             document.getElementById('activeWorldsCount').textContent = active;
             document.getElementById('emptyWorldsCount').textContent = empty;
-            const ap = (active / list.length) * 100;
+            const ap = worlds.length > 0 ? (active / worlds.length) * 100 : 0;
             document.getElementById('activeWorldsBar').style.width = ap + '%';
             document.getElementById('emptyWorldsBar').style.width = (100 - ap) + '%';
 
-            // Top worlds
-            const top = [...list].sort((a,b) => b.players - a.players).slice(0, 3);
+            const top = [...worlds].sort((a,b) => (b.players || b.online || 0) - (a.players || a.online || 0)).slice(0, 3);
             const colors = ['#fbbf24', '#94a3b8', '#f97316'];
             document.getElementById('topWorldsList').innerHTML = top.map((w, i) => `
                 <div class="flex items-center justify-between text-sm">
@@ -1256,19 +1246,22 @@
                         <span style="font-family:'Orbitron',sans-serif;font-size:11px;color:${colors[i]}">#${i+1}</span>
                         <span>${w.name}</span>
                     </span>
-                    <span style="color:var(--muted)">${w.players || 0} 👥</span>
+                    <span style="color:var(--muted)">${w.players || w.online || 0} 👥</span>
                 </div>
             `).join('');
 
-            // World cards
-            document.getElementById('worldsContainer').innerHTML = [...list]
-                .sort((a,b) => b.players - a.players)
-                .map(w => `
-                    <div class="world-card" onclick="showToast('🌍 ${w.name} — ${w.players || 0} players')">
-                        <p class="font-semibold text-sm" style="color:#e2e8f0">${w.name}</p>
-                        <span class="text-xs" style="color:var(--muted)">👥 ${w.players || 0}</span>
-                    </div>
-                `).join('');
+            document.getElementById('worldsContainer').innerHTML = [...worlds]
+                .sort((a,b) => (b.players || b.online || 0) - (a.players || a.online || 0))
+                .map(w => {
+                    const pc = w.players || w.online || 0;
+                    const name = w.name || '?';
+                    return `<div class="world-card" onclick="showToast('🌍 ${name} — ${pc} players')">
+                        <p class="font-semibold text-sm" style="color:#e2e8f0">${name}</p>
+                        <span class="text-xs" style="color:var(--muted)">👥 ${pc}</span>
+                    </div>`;
+                }).join('');
+        } else if (!worldsData) {
+            document.getElementById('worldsContainer').innerHTML = '<div style="color:var(--muted);font-size:13px;text-align:center;padding:20px;grid-column:1/-1">Tidak dapat memuat data worlds.</div>';
         }
 
         if (currentPlayers > 0) updateChart(currentPlayers);
