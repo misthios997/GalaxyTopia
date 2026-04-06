@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DevTools Ultra Pro Max v8.1 - Partner Coding</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg: #020617; --surface: #0f172a; --primary: #22d3ee;
+            --secondary: #818cf8; --accent: #f472b6; --danger: #ef4444;
+            --success: #10b981; --text: #f8fafc; --text-dim: #94a3b8; --border: #1e293b;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
+
+        header {
+            padding: 1rem; background: var(--surface); border-bottom: 2px solid var(--primary);
+            text-align: center; position: sticky; top: 0; z-index: 2000;
+        }
+        .brand { font-size: 1.4rem; font-weight: 900; background: linear-gradient(to right, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+        .search-area { padding: 1rem; max-width: 800px; margin: 0 auto; width: 100%; }
+        .input-group { display: flex; background: var(--surface); border: 2px solid var(--border); border-radius: 12px; overflow: hidden; padding: 4px; }
+        input#targetUrl { flex: 1; background: transparent; border: none; color: white; padding: 10px; outline: none; font-size: 14px; }
+        .btn-main { background: var(--primary); color: var(--bg); border: none; padding: 0 20px; border-radius: 8px; font-weight: 800; cursor: pointer; }
+
+        .tabs-nav { 
+            display: flex; overflow-x: auto; background: var(--surface); 
+            position: sticky; top: 68px; z-index: 1000; border-bottom: 1px solid var(--border);
+        }
+        .tab-btn { 
+            padding: 15px 20px; font-size: 0.7rem; font-weight: 800; color: var(--text-dim); 
+            cursor: pointer; white-space: nowrap; border-bottom: 3px solid transparent; text-transform: uppercase;
+        }
+        .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); background: rgba(34, 211, 238, 0.05); }
+
+        .container { flex: 1; padding: 1rem; max-width: 1000px; margin: 0 auto; width: 100%; padding-bottom: 80px; }
+        .pane { display: none; animation: fadeIn 0.3s ease; }
+        .pane.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1rem; margin-bottom: 1rem; }
+        .card-header { font-size: 0.75rem; color: var(--secondary); font-weight: 900; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+        
+        .asset-item { 
+            background: #1e293b; padding: 10px; border-radius: 8px; margin-bottom: 8px; 
+            border-left: 3px solid var(--border);
+        }
+        .url-text { font-size: 0.7rem; font-family: 'JetBrains Mono', monospace; word-break: break-all; color: var(--text-dim); margin-bottom: 8px; }
+        
+        .btn-sm { 
+            padding: 8px 12px; font-size: 0.65rem; border-radius: 6px; border: 1px solid var(--border);
+            background: #0f172a; color: white; cursor: pointer; font-weight: 700; transition: 0.2s;
+        }
+        .btn-sm:hover { background: var(--primary); color: var(--bg); }
+
+        pre { 
+            background: #000; padding: 1rem; border-radius: 8px; font-size: 11px; 
+            color: #10b981; overflow: auto; max-height: 60vh; border: 1px solid var(--border); 
+            white-space: pre; tab-size: 4;
+        }
+
+        #loader { 
+            display: none; position: fixed; inset: 0; background: rgba(2,6,23,0.9); 
+            z-index: 9999; flex-direction: column; align-items: center; justify-content: center; 
+        }
+        .spinner { width: 40px; height: 40px; border: 4px solid #1e293b; border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .toast {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            background: var(--primary); color: var(--bg); padding: 10px 20px;
+            border-radius: 50px; font-weight: 800; font-size: 0.8rem;
+            display: none; z-index: 10000; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+    </style>
+</head>
+<body>
+
+<div id="loader">
+    <div class="spinner"></div>
+    <p style="margin-top: 15px; font-weight: 800; color: var(--primary);">PROCESSING SOURCE CODE...</p>
+</div>
+
+<div id="toast" class="toast">BERHASIL!</div>
+
+<header><div class="brand"><i class="fas fa-terminal"></i> DEVTOOLS V8.1 PRO</div></header>
+
+<div class="search-area">
+    <div class="input-group">
+        <input type="url" id="targetUrl" placeholder="https://example.com" value="https://betlock.vercel.app/">
+        <button class="btn-main" onclick="processScan()">SCAN</button>
+    </div>
+</div>
+
+<nav class="tabs-nav">
+    <div class="tab-btn active" onclick="changeTab(event, 'p-dash')">Dash</div>
+    <div class="tab-btn" onclick="changeTab(event, 'p-src')">Source (HTML)</div>
+    <div class="tab-btn" onclick="changeTab(event, 'p-assets')">Scripts & CSS</div>
+    <div class="tab-btn" onclick="changeTab(event, 'p-img')">Media</div>
+    <div class="tab-btn" onclick="changeTab(event, 'p-sec')">Security</div>
+</nav>
+
+<main class="container">
+    <div id="p-dash" class="pane active">
+        <div class="card">
+            <div class="card-header"><i class="fas fa-info-circle"></i> SITE INFO</div>
+            <div id="seo-info">Menunggu scan...</div>
+        </div>
+        <div class="card">
+            <div class="card-header"><i class="fas fa-palette"></i> COLORS</div>
+            <div id="color-palette" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 8px;"></div>
+        </div>
+    </div>
+
+    <div id="p-src" class="pane">
+        <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+            <button class="btn-sm" onclick="copyLargeText('codeView')"><i class="fas fa-copy"></i> COPY ALL HTML</button>
+            <button class="btn-sm" onclick="downloadFile()"><i class="fas fa-download"></i> DOWNLOAD</button>
+        </div>
+        <pre id="codeView">Data kosong.</pre>
+    </div>
+
+    <div id="p-assets" class="pane">
+        <div id="list-assets"></div>
+    </div>
+
+    <div id="p-img" class="pane">
+        <div style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
+            <button class="btn-sm" onclick="downloadAllMedia()"><i class="fas fa-download"></i> DOWNLOAD ALL MEDIA</button>
+        </div>
+        <div id="list-images" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px;">
+            <p style="grid-column: 1 / -1; text-align: center; color: var(--text-dim); margin-top: 20px;">Belum ada media.</p>
+        </div>
+    </div>
+
+    <div id="p-sec" class="pane">
+        <div class="card">
+            <div class="card-header" style="color: var(--danger);"><i class="fas fa-shield-alt"></i> LEAKS FOUND</div>
+            <div id="sec-alerts"></div>
+        </div>
+    </div>
+</main>
+
+<script>
+    let rawSource = "";
+    let mediaUrls = [];
+
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        t.innerText = msg;
+        t.style.display = 'block';
+        setTimeout(() => { t.style.display = 'none'; }, 2000);
+    }
+
+    function changeTab(e, id) {
+        document.querySelectorAll('.pane').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        e.currentTarget.classList.add('active');
+    }
+
+    async function copyLargeText(elementId) {
+        try {
+            const text = (elementId === 'codeView') ? rawSource : document.getElementById(elementId).innerText;
+            if(!text) return alert("Tidak ada data untuk disalin!");
+            
+            await navigator.clipboard.writeText(text);
+            showToast("HTML COPIED (" + text.length + " chars)");
+        } catch (err) {
+            const textArea = document.createElement("textarea");
+            textArea.value = rawSource;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            showToast("COPIED (Fallback)");
+        }
+    }
+
+    async function processScan() {
+        const urlInput = document.getElementById('targetUrl').value;
+        if(!urlInput) return;
+        
+        const loader = document.getElementById('loader');
+        loader.style.display = 'flex';
+
+        try {
+            const proxy = `https://api.allorigins.win/raw?url=${encodeURIComponent(urlInput)}`;
+            const res = await fetch(proxy);
+            rawSource = await res.text();
+            
+            document.getElementById('codeView').textContent = rawSource;
+
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(rawSource, "text/html");
+
+            document.getElementById('seo-info').innerHTML = `
+                <p style="font-weight:bold; color:var(--primary)">${doc.title || 'No Title'}</p>
+                <p style="font-size:0.7rem; margin-top:5px;">${urlInput}</p>
+            `;
+
+            const colors = [...new Set(rawSource.match(/#([a-fA-F0-9]{3,6})/g))].slice(0, 20);
+            document.getElementById('color-palette').innerHTML = colors.map(c => `
+                <div onclick="copyDirect('${c}')" style="background:${c}; height:40px; border-radius:4px; border:1px solid #334155; cursor:pointer;"></div>
+            `).join('');
+
+            const assets = [...doc.querySelectorAll('script, link[rel="stylesheet"]')];
+            document.getElementById('list-assets').innerHTML = assets.map(a => {
+                const link = a.src || a.href;
+                if(!link) return '';
+                return `
+                    <div class="asset-item">
+                        <div class="url-text">${link}</div>
+                        <button class="btn-sm" onclick="copyDirect('${link}')">COPY URL</button>
+                    </div>
+                `;
+            }).join('');
+
+            const imgs = [...new Set([...doc.querySelectorAll('img')].map(i => i.src))];
+            mediaUrls = imgs.slice(0, 30);
+            const listImages = document.getElementById('list-images');
+            if (mediaUrls.length > 0) {
+                listImages.innerHTML = mediaUrls.map((src, index) => `
+                    <div class="card" style="padding:5px; text-align:center;">
+                        <img src="${src}" style="max-width:100%; height:80px; object-fit:contain;" onerror="this.src='https://placehold.co/100x80?text=Error'">
+                        <button class="btn-sm" style="width:100%; margin-top:5px;" onclick="downloadSingleMedia('${src}', ${index})"><i class="fas fa-download"></i> DOWNLOAD</button>
+                    </div>
+                `).join('');
+            } else {
+                listImages.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; color: var(--text-dim); margin-top: 20px;">Belum ada media.</p>';
+            }
+
+            loader.style.display = 'none';
+            showToast("SCAN COMPLETE!");
+        } catch (e) {
+            loader.style.display = 'none';
+            alert("Gagal mengambil data. Coba URL lain atau cek koneksi.");
+        }
+    }
+
+    async function copyDirect(text) {
+        await navigator.clipboard.writeText(text);
+        showToast("COPIED!");
+    }
+
+    function downloadFile() {
+        const blob = new Blob([rawSource], {type: 'text/html'});
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = "source_code.html";
+        a.click();
+    }
+
+    // Fungsi baru untuk mengunduh satu file media
+    async function downloadSingleMedia(url, index) {
+        try {
+            const response = await fetch(url);
+            const blob = await response.blob();
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `media_${index + 1}.${blob.type.split('/')[1]}`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        } catch (error) {
+            console.error('Error downloading media:', error);
+            // Fallback: buka di tab baru jika fetch gagal (masalah CORS)
+            window.open(url, '_blank');
+        }
+    }
+
+    // Fungsi baru untuk mengunduh semua file media secara berurutan
+    async function downloadAllMedia() {
+        if (mediaUrls.length === 0) return alert("Tidak ada media untuk diunduh!");
+        showToast("DOWNLOADING ALL MEDIA...");
+        for (let i = 0; i < mediaUrls.length; i++) {
+            await downloadSingleMedia(mediaUrls[i], i);
+            // Menambahkan sedikit jeda untuk mencegah browser memblokir beberapa unduhan sekaligus
+            await new Promise(resolve => setTimeout(resolve, 500)); 
+        }
+        showToast("ALL DOWNLOADS STARTED!");
+    }
+</script>
+</body>
+</html>
