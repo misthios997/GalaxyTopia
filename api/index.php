@@ -1,6 +1,13 @@
 <?php
 // Memulai sesi untuk menyimpan status login
 session_start();
+
+// Jika user sudah login sebelumnya, langsung arahkan ke dashboard biar tidak perlu login ulang
+if (isset($_SESSION['user'])) {
+    header("Location: /dashboard.php");
+    exit();
+}
+
 $pesan_notifikasi = "";
 
 // Mengecek apakah form telah disubmit
@@ -28,7 +35,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Mengecek jawaban dari Lua
     if ($response === "sukses") {
-        $pesan_notifikasi = "<div class='alert success'>✅ Login Berhasil! Selamat datang, " . htmlspecialchars($input_growid) . ".</div>";
+        // MENYIMPAN NAMA USER KE SESSION DAN PINDAH HALAMAN
+        $_SESSION['user'] = $input_growid;
+        header("Location: /dashboard.php");
+        exit();
     } elseif ($response === "gagal") {
         $pesan_notifikasi = "<div class='alert error'>❌ GrowID atau Password salah!</div>";
     } else {
