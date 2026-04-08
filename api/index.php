@@ -5,47 +5,34 @@ $pesan_notifikasi = "";
 
 // Mengecek apakah form telah disubmit
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Data Database GTPS kamu
-    $host = "91.134.85.13"; 
-    $username = "MehanGG";
-    $password = "123mehansgg456";
-    $dbname = "FarmaPS";
-
     $input_growid = $_POST['growid'];
     $input_password = $_POST['password'];
 
-    try {
-        // Melakukan koneksi ke database game
-        $conn = new mysqli($host, $username, $password, $dbname);
+    // URL tujuan ke Lua In-Game kamu
+    $url_lua = "https://api.gtps.cloud/g-api/20687/login";
+    
+    // Menyiapkan data yang akan dikirim ke Lua (Metode POST)
+    $data = http_build_query(array('growid' => $input_growid, 'password' => $input_password));
+    $options = array(
+        'http' => array(
+            'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
+            'method'  => 'POST',
+            'content' => $data,
+            'ignore_errors' => true // Mencegah fatal error di web jika server game sedang mati
+        )
+    );
+    
+    // Mengeksekusi pengiriman ke Lua dan menangkap jawabannya
+    $context  = stream_context_create($options);
+    $response = @file_get_contents($url_lua, false, $context);
 
-        // Mencari GrowID di tabel users (Tabel bawaan GTPS pada umumnya)
-        $stmt = $conn->prepare("SELECT password FROM users WHERE name = ?");
-        $stmt->bind_param("s", $input_growid);
-        $stmt->execute();
-        $result = $stmt->get_result();
-
-        // Jika GrowID ditemukan
-        if ($result->num_rows > 0) {
-            $row = $result->fetch_assoc();
-            
-            // Mengecek kecocokan password
-            // Catatan: Jika engine GTPS kamu menggunakan enkripsi (hash) untuk password, bagian ini perlu disesuaikan dengan jenis hash engine kamu.
-            if ($input_password === $row['password']) {
-                $pesan_notifikasi = "<div class='alert success'>✅ Login Berhasil! Selamat datang, " . htmlspecialchars($input_growid) . ".</div>";
-                // Di sini kamu bisa menambahkan $_SESSION['user'] = $input_growid; untuk mengunci halaman dashboard
-            } else {
-                $pesan_notifikasi = "<div class='alert error'>❌ Password yang kamu masukkan salah!</div>";
-            }
-        } else {
-            $pesan_notifikasi = "<div class='alert error'>❌ GrowID tidak ditemukan di database server!</div>";
-        }
-
-        $stmt->close();
-        $conn->close();
-
-    } catch (mysqli_sql_exception $e) {
-        // Ini akan muncul jika gtps.cloud kamu belum membuka akses Remote MySQL (%)
-        $pesan_notifikasi = "<div class='alert error'>❌ Gagal terhubung ke Database GTPS.<br><small>Error: " . $e->getMessage() . "</small><br>Pastikan kamu sudah meminta gtps.cloud untuk membuka Remote MySQL (Allow IP %).</div>";
+    // Mengecek jawaban dari Lua
+    if ($response === "sukses") {
+        $pesan_notifikasi = "<div class='alert success'>✅ Login Berhasil! Selamat datang, " . htmlspecialchars($input_growid) . ".</div>";
+    } elseif ($response === "gagal") {
+        $pesan_notifikasi = "<div class='alert error'>❌ GrowID atau Password salah!</div>";
+    } else {
+        $pesan_notifikasi = "<div class='alert error'>❌ Gagal terhubung ke server game. Pastikan server nyala.</div>";
     }
 }
 ?>
